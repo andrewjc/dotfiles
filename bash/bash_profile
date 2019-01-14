@@ -1,0 +1,8 @@
+alias rbc="source ~/.bash_profile"
+alias reload-profile="rbc"
+
+source ~/.bash_settings
+source ~/.bash_paths
+source ~/.bash_commands
+source ~/.bash_rc
+

@@ -1,0 +1,29 @@
+alias edit-profile="code ~/.bash_profile"
+alias edit-rc="code ~/.bashrc"
+alias edit-commands="code ~/.bash_commands"
+
+save_profile_settings() {
+    echo "export BASH_PROFILE_OPTION_USERNAME=$BASH_PROFILE_OPTION_USERNAME" > ~/.bash_settings
+    echo "export BASH_PROFILE_OPTION_HOSTNAME=$BASH_PROFILE_OPTION_HOSTNAME" >> ~/.bash_settings
+    echo "export BASH_PROFILE_OPTION_GIT=$BASH_PROFILE_OPTION_GIT" >> ~/.bash_settings
+}
+
+alias set-profile-option-no-username="export BASH_PROFILE_OPTION_USERNAME=false ; save_profile_settings ; rbc"
+alias set-profile-option-show-username="export BASH_PROFILE_OPTION_USERNAME=true ; save_profile_settings ; rbc"
+alias set-profile-option-no-hostname="export BASH_PROFILE_OPTION_HOSTNAME=false ; save_profile_settings ; rbc"
+alias set-profile-option-show-hostname="export BASH_PROFILE_OPTION_HOSTNAME=true ; save_profile_settings ; rbc"
+alias set-profile-option-no-git="export BASH_PROFILE_OPTION_GIT=false ; save_profile_settings ; rbc"
+alias set-profile-option-show-git="export BASH_PROFILE_OPTION_GIT=true ; save_profile_settings ; rbc"
+
+
+alias rebase2="git rebase -i HEAD~2"
+alias rebase3="git rebase -i HEAD~3"
+alias rebase4="git rebase -i HEAD~4"
+alias rebase5="git rebase -i HEAD~5"
+alias rebase6="git rebase -i HEAD~6"
+alias rebase7="git rebase -i HEAD~7"
+alias rebase8="git rebase -i HEAD~8"
+alias rebase9="git rebase -i HEAD~9"
+alias rebase10="git rebase -i HEAD~10"
+
+alias cd-dev="cd ~/Development"
