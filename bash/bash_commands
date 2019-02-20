@@ -1,6 +1,7 @@
 alias edit-profile="code ~/.bash_profile"
 alias edit-rc="code ~/.bashrc"
 alias edit-commands="code ~/.bash_commands"
+alias edit-paths="code ~/.bash_paths"
 
 save_profile_settings() {
     echo "export BASH_PROFILE_OPTION_USERNAME=$BASH_PROFILE_OPTION_USERNAME" > ~/.bash_settings
@@ -15,6 +16,7 @@ alias set-profile-option-show-hostname="export BASH_PROFILE_OPTION_HOSTNAME=true
 alias set-profile-option-no-git="export BASH_PROFILE_OPTION_GIT=false ; save_profile_settings ; rbc"
 alias set-profile-option-show-git="export BASH_PROFILE_OPTION_GIT=true ; save_profile_settings ; rbc"
 
+alias copy-ssh-key="cat ~/.ssh/id_rsa.pub | pbcopy"
 
 alias rebase2="git rebase -i HEAD~2"
 alias rebase3="git rebase -i HEAD~3"
@@ -27,3 +29,56 @@ alias rebase9="git rebase -i HEAD~9"
 alias rebase10="git rebase -i HEAD~10"
 
 alias cd-dev="cd ~/Development"
+
+# bash kubernetes functions
+alias kget="k get"
+alias kgeta="k get --all-namespaces"
+
+function kubehelp() {
+    echo "Kubernetes related bash commands:"
+    echo "k - alias for kubectl"
+    echo "ka - perform kubectl apply -f"
+    echo "kget - alias for k get"
+    echo "kgeta - alias for k get --all-namespaces"
+    echo "k8sh - exec shell in pod"
+    echo "kp - list pods"
+    echo "ks - list services"
+    echo "kn - list namespaces"
+    echo "kl - logs for pod"
+}
+
+function k () {
+    kubectl "$@"
+}
+
+function ka () {
+    kubectl apply -f "$@"
+}
+
+# exec shell in pod
+function k8sh () {
+    local p="$1"
+    shift
+    k exec -it "$p" -- env COLUMNS=$(tput cols) LINES=$(tput lines) TERM=$TERM /bin/sh "$@"
+}
+
+# list pods
+function kp () {
+    k get -o wide pods "$@"
+}
+
+# list services
+function ks () {
+    k get -o wide svc "$@"
+}
+
+# list namespaces
+function kn () {
+    k get -o wide namespaces "$@"
+}
+
+# logs for pod
+function kl () {
+    [[ $PAGER ]] || PAGER=more
+    k logs "$@" | $PAGER
+}
