@@ -1,0 +1,6 @@
+VSCODE="$HOME/Applications/VsCode.app/Contents/Resources/app/bin"
+export PATH=$JAVA_HOME/bin:$PATH
+
+PATH=$PATH:$VSCODE
+
+

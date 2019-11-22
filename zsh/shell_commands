@@ -1,0 +1,83 @@
+alias edit-profile="zshconfig"
+alias edit-commands="code ~/Profile/shell_commands"
+alias edit-paths="code ~/Profile/shell_paths"
+
+alias copy-ssh-key="cat ~/.ssh/id_rsa.pub | pbcopy"
+
+alias rebase2="git rebase -i HEAD~2"
+alias rebase3="git rebase -i HEAD~3"
+alias rebase4="git rebase -i HEAD~4"
+alias rebase5="git rebase -i HEAD~5"
+alias rebase6="git rebase -i HEAD~6"
+alias rebase7="git rebase -i HEAD~7"
+alias rebase8="git rebase -i HEAD~8"
+alias rebase9="git rebase -i HEAD~9"
+alias rebase10="git rebase -i HEAD~10"
+alias gpull="git pull"
+alias gpush="git push"
+alias gfpush="git push -f"
+alias gstat="git status"
+alias gstats="git status"
+
+function git-new-branch() {
+    git checkout -b $@
+    git push --set-upstream origin $@
+}
+
+function git-new-local-branch() {
+    git checkout -b $@
+}
+
+function gitco() {
+    git checkout $@
+}
+alias git-checkout="gitco"
+alias gitc="gitco"
+
+alias cdev="cd ~/Development"
+alias dps="docker ps"
+
+function dstop() {
+    docker stop "$@"
+}
+
+function dinspect() {
+    docker inspect "$@"
+}
+
+function dbash() {
+    docker exec -it $@ /bin/bash
+}
+
+function dlogs() {
+    docker logs $@
+}
+
+function dremove() {
+    docker rm $@
+}
+
+function dstopall() {
+    docker stop $(docker ps -a -q)
+}
+
+function drmall() {
+    docker rm $(docker ps -a -q)
+}
+
+function drmiall() {
+    docker rmi $(docker images -q)
+}
+
+function gw() {
+    ./gradlew "$@"
+}
+
+function whats-on-port() {
+    lsof -i TCP:$@
+}
+
+function findpid() {
+    ps -e | grep "$@"
+}
+
