@@ -1,3 +1,10 @@
+
+# Color helpers
+autoload -Uz colors && colors
+_ok()   { print -P "%F{green}✔%f $*"; }
+_err()  { print -P "%F{red}✖%f $*" >&2; }
+_info() { print -P "%F{blue}ℹ%f $*"; }
+
 alias edit-profile="zshconfig"
 alias edit-commands="code ~/Profile/shell_commands"
 alias edit-paths="code ~/Profile/shell_paths"
@@ -81,3 +88,98 @@ function findpid() {
     ps -e | grep "$@"
 }
 
+: "${OPENSHIFT_CFG:=$HOME/.openshift}"
+
+_oc_cfg_get() {
+  local key="$1"
+  [[ -f "$OPENSHIFT_CFG" ]] || { _err "Config file '$OPENSHIFT_CFG' not found."; return 1; }
+  local value
+  value="$(grep -E "^[[:space:]]*${key}[[:space:]]*=" "$OPENSHIFT_CFG" | head -n1 | cut -d'=' -f2- | xargs)"
+  [[ -n "$value" ]] || { _err "Key '${key}' not found in $OPENSHIFT_CFG."; return 1; }
+  print -- "$value"
+}
+
+# oc-login  <environment>
+oc-login() {
+  local env="$1"
+  [[ -n "$env" ]] || { _err "Usage: oc-login <environment>"; return 1; }
+  local url token
+  url="$(_oc_cfg_get "${env}.url")"   || return 1
+  token="$(_oc_cfg_get "${env}.token")" || return 1
+  _info "Logging in to '${env}' ($url)…"
+  oc login --token="$token" --server="$url" --insecure-skip-tls-verify=false && _ok "Logged in to ${env}"
+}
+
+# oc-set-project  <project>
+oc-set-project() {
+  local proj="$1"
+  [[ -n "$proj" ]] || { _err "Usage: oc-set-project <project>"; return 1; }
+  _info "Switching to project '$proj'…"
+  oc project "$proj" && _ok "Current project is now $(oc project -q)"
+}
+
+# oc-get-pods  [additional kubectl/oc arguments]
+oc-get-pods() {
+  _info "Listing pods in project '$(oc project -q)'"
+  oc get pods "$@"
+}
+
+# oc-scale-deployment  <deployment> <replicas>
+oc-scale-deployment() {
+  local dep="$1" repl="$2"
+  [[ -n "$dep" && -n "$repl" ]] || { _err "Usage: oc-scale-deployment <deployment> <replicas>"; return 1; }
+  _info "Scaling deployment/$dep to $repl replicas…"
+  oc scale deployment/"$dep" --replicas="$repl" && _ok "Requested scale applied"
+}
+
+# oc-delete  <pod>
+oc-delete() {
+  local pod="$1"
+  [[ -n "$pod" ]] || { _err "Usage: oc-delete <pod>"; return 1; }
+  _info "Deleting pod '$pod'…"
+  oc delete pod "$pod" && _ok "Deletion request submitted"
+}
+
+# oc-force-delete  <pod>
+oc-force-delete() {
+  local pod="$1"
+  [[ -n "$pod" ]] || { _err "Usage: oc-force-delete <pod>"; return 1; }
+  _info "Force-deleting pod '$pod'…"
+  oc delete pod "$pod" --grace-period=0 --force --wait=false 2>/dev/null || true
+
+  if oc get pod "$pod" &>/dev/null; then
+    _info "Pod still present; stripping finalizers"
+    oc patch pod "$pod" --type=merge -p '{"metadata":{"finalizers":[]}}' >/dev/null
+    oc delete pod "$pod" --grace-period=0 --force --wait=false >/dev/null
+  fi
+
+  if oc get pod "$pod" &>/dev/null; then
+    _err "Unable to remove pod '$pod'. Manual intervention required."
+    return 1
+  else
+    _ok "Pod '$pod' removed"
+  fi
+}
+
+# oc-logs  <pod> [container] [-f|--follow]
+oc-logs() {
+  local pod="$1"; shift || true
+  [[ -n "$pod" ]] || { _err "Usage: oc-logs <pod> [container] [--follow]"; return 1; }
+
+  local follow_flag="-f"
+  if [[ "$1" == "--no-follow" ]]; then
+    follow_flag=""
+    shift
+  fi
+
+  _info "Streaming logs for pod '$pod'…"
+  oc logs $follow_flag "$pod" "$@"
+}
+
+# --------------------------------------------------------------------------
+# 8. Optional: load autocompletions for these functions ---------------------
+#    Uncomment if you keep this file in your $fpath.
+# --------------------------------------------------------------------------
+# if [[ -n ${ZSH_VERSION} ]]; then
+#   autoload -Uz compinit && compinit
+# fi
